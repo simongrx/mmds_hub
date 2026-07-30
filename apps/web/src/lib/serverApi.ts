@@ -1,4 +1,5 @@
 import { API_URL } from "./api";
+import { BACKEND_ENABLED } from "./features";
 import { FALLBACK_PORTFOLIO, FALLBACK_SERVICES } from "./landingFallback";
 import type { Service } from "./types";
 
@@ -20,6 +21,12 @@ export interface PortfolioItem {
 // porque, si no, el degradado es invisible — la web se ve entera y nadie se
 // entera de que la API lleva días caída.
 async function getJson<T>(path: string, fallback: T): Promise<T> {
+  // Sin API declarada no se intenta la petición siquiera. Antes se pedía igual
+  // y se esperaba a que la conexión fuera rechazada, en cada render de cada
+  // página: latencia regalada y un log lleno de avisos alarmantes que en
+  // realidad describían el funcionamiento normal.
+  if (!BACKEND_ENABLED) return fallback;
+
   try {
     const res = await fetch(`${API_URL}${path}`, { cache: "no-store" });
     if (!res.ok) {

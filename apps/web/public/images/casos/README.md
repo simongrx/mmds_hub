@@ -39,5 +39,10 @@ casos y la sección sigue coherente.
 
 ## Cuándo se ve el cambio
 
-La home se renderiza en cada petición, así que basta con **refrescar el
-navegador**: no hace falta reiniciar el servidor ni recompilar.
+**En local**, la home se renderiza en cada petición: basta con **refrescar el
+navegador**, sin reiniciar el servidor ni recompilar.
+
+**En la web publicada** hay que subir el archivo al repositorio (`git add`,
+`commit` y `push`) y esperar a que termine el despliegue. No es una limitación
+de este código: un servidor en la nube no tiene una carpeta donde puedas dejar
+cosas a mano, así que las imágenes viajan con el resto del proyecto.
