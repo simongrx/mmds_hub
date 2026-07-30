@@ -3,6 +3,7 @@ import archiver from "archiver";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
+import type { Deliverable } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { UPLOADS_DIR } from "../lib/upload.js";
 import { validate } from "../utils/validate.js";
@@ -80,7 +81,7 @@ publicRouter.get("/proyecto/:accessToken/download-all", async (req, res, next) =
       return res.status(result.error.status).json(result.error.body);
     }
 
-    const files = (result.project!.deliverables ?? []).filter((d) =>
+    const files = (result.project!.deliverables ?? []).filter((d: Deliverable) =>
       d.fileUrl?.startsWith("/uploads/")
     );
     if (files.length === 0) {
