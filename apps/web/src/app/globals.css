@@ -1,0 +1,379 @@
+@import "../styles/variables.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* compensa el navbar sticky al saltar a #anclas */
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-mist);
+  color: var(--color-ink);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+/* Flotación en bucle de la abeja del hero. Sólo anima `transform`, así que no
+   dispara layout ni paint. El parallax de cursor vive en el wrapper padre
+   (HeroBee.tsx) para que ambos movimientos no se pisen. */
+@keyframes hero-bee-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -16px, 0);
+  }
+}
+
+.hero-bee-float {
+  animation: hero-bee-float 5.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── Vidrio del hero ──────────────────────────────────────────────────────────
+   `usePointerGlow` escribe --px/--py (posición del cursor en % del elemento) y
+   --dx/--dy (-1..1 respecto al centro). Se registran con @property para que
+   interpolen como número/porcentaje dentro de calc() y de los gradientes; sin
+   esto Chrome trata --dx como token opaco y `rotateY(calc(... * 5deg))` falla.
+   Los valores iniciales son el estado sin cursor: reflejo centrado, sin tilt. */
+@property --px {
+  syntax: "<percentage>";
+  /* Heredables: el hook las escribe en el contenedor y las consumen sus
+     descendientes (la capa de inclinación, los reflejos, el spotlight). */
+  inherits: true;
+  initial-value: 50%;
+}
+
+@property --py {
+  syntax: "<percentage>";
+  /* Heredables: el hook las escribe en el contenedor y las consumen sus
+     descendientes (la capa de inclinación, los reflejos, el spotlight). */
+  inherits: true;
+  initial-value: 50%;
+}
+
+@property --dx {
+  syntax: "<number>";
+  /* Heredables: el hook las escribe en el contenedor y las consumen sus
+     descendientes (la capa de inclinación, los reflejos, el spotlight). */
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --dy {
+  syntax: "<number>";
+  /* Heredables: el hook las escribe en el contenedor y las consumen sus
+     descendientes (la capa de inclinación, los reflejos, el spotlight). */
+  inherits: true;
+  initial-value: 0;
+}
+
+/* Card: perspectiva en el contenedor, rotación en la capa intermedia. */
+.hero-glass-card {
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+}
+
+.hero-glass-card__tilt {
+  /* El ángulo base da la perspectiva angular incluso sin cursor; --dx/--dy sólo
+     añaden unos grados de respuesta al puntero. */
+  transform: rotateY(calc(-9deg + var(--dx) * 5deg)) rotateX(calc(4deg - var(--dy) * 4deg));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero-glass-card__surface {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  /* Tinte miel bajo el blanco translúcido: es el que levanta el contraste del
+     lead sobre los fotogramas claros del video (antes lo hacía el velo lateral). */
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.26),
+    rgba(255, 255, 255, 0.08)
+  );
+  background-color: rgba(244, 196, 48, 0.12);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  /* Bisel superior/inferior + sombra proyectada. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+    0 30px 60px -14px rgba(120, 90, 20, 0.45);
+}
+
+.hero-glass-card__sheen,
+.hero-glass-card__glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.hero-glass-card__sheen {
+  background-image: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.32) 46%,
+    transparent 60%
+  );
+}
+
+.hero-glass-card__glare {
+  background-image: radial-gradient(
+    circle at var(--px) var(--py),
+    rgba(255, 255, 255, 0.55),
+    transparent 60%
+  );
+  mix-blend-mode: screen;
+}
+
+.hero-glass-card__content {
+  position: relative;
+  /* La tipografía de dentro se dimensiona en `cqw` (ver CopyBlock): así escala
+     con el ancho de la card y no con el del viewport. Es lo que mantiene el
+     número de líneas —y por tanto el alto de la card— estable en cualquier
+     pantalla; midiendo en vw, en portátiles de 1024 px la card se estiraba hasta
+     meterse debajo de la barra de features. */
+  container-type: inline-size;
+  padding: 1.95rem 1.8rem;
+  /* Despega el texto de la superficie para que la rotación se lea como volumen
+     y no como una imagen inclinada. */
+  transform: translateZ(28px);
+}
+
+/* Lettering gigante. Las tres capas comparten caja: `fill` es la que la define
+   (en flujo) y las decorativas se superponen en absoluto.
+   Va en @layer components y no suelto porque el CSS sin capa gana a cualquier
+   utilidad de Tailwind: con `position: relative` fuera de la capa, el
+   `absolute` con el que Hero coloca las palabras no tendría efecto. */
+@layer components {
+  .hero-glass-word {
+    position: relative;
+    display: inline-block;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .hero-glass-word__bloom,
+  .hero-glass-word__rim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hero-glass-word__bloom {
+    /* Cristal esmerilado del interior: al ir muy poco desenfocada, esta copia
+       aclara el hueco del glifo además de derramar halo por fuera. Es lo que
+       mantiene la letra visible ahora que el relleno es casi transparente. */
+    color: rgba(255, 243, 205, 0.42);
+    /* Sombra sólo en esta capa: la del relleno se diluye con su propia alfa, y
+       sin algo oscuro por detrás las letras se perdían sobre las nubes blancas. */
+    text-shadow: 0 8px 14px rgba(78, 52, 12, 0.45);
+    filter: blur(10px);
+  }
+
+  .hero-glass-word__fill {
+    position: relative;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Cristal mostaza casi transparente: el tinte apenas colorea y son el canto
+       y el esmerilado de `__bloom` los que dibujan la letra, como en el vidrio
+       líquido de referencia. Con alfas más altas se pierde el efecto y vuelve a
+       leerse como texto plano de color. */
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 240, 190, 0.32) 0%,
+      rgba(255, 213, 74, 0.26) 44%,
+      rgba(217, 155, 17, 0.36) 100%
+    );
+    /* Canto más marcado que antes: con el relleno tan translúcido, es lo que da
+       el volumen. El reflejo que sigue al cursor lo enciende por tramos. */
+    -webkit-text-stroke: 2px rgba(255, 248, 224, 0.5);
+    filter: drop-shadow(0 10px 16px rgba(90, 62, 12, 0.32));
+  }
+
+  /* Spotlight de bordes: la capa pinta SÓLO el contorno (relleno transparente,
+     `-webkit-text-stroke` con color) y una máscara radial deja verlo únicamente
+     alrededor del cursor. Con `background-clip: text` no se podría: el recorte
+     alcanza también el interior del glifo y se encendería la letra entera. */
+  .hero-glass-word__rim {
+    color: transparent;
+    -webkit-text-stroke: 3.5px rgba(255, 252, 244, 0.95);
+    /* El halo se recorta con la misma máscara, así que la luz queda localizada
+       donde está el cursor en vez de rodear toda la palabra. */
+    filter: drop-shadow(0 0 9px rgba(255, 250, 235, 0.6));
+    -webkit-mask-image: radial-gradient(
+      circle 13vw at var(--px) var(--py),
+      #000 0%,
+      rgba(0, 0, 0, 0.35) 42%,
+      transparent 66%
+    );
+    mask-image: radial-gradient(
+      circle 13vw at var(--px) var(--py),
+      #000 0%,
+      rgba(0, 0, 0, 0.35) 42%,
+      transparent 66%
+    );
+  }
+}
+
+/* ── Tramo oscuro (todo lo que va después del hero) ───────────────────────────
+   El hero es luminoso; a partir de DarkSeam la página se hunde en `void` con la
+   miel como neón. Estas clases son el vocabulario compartido de ese tramo, y
+   son deliberadamente hermanas de las del hero (mismo vidrio, mismas @property
+   --px/--py) para que la costura no se lea como un cambio de sitio. */
+
+/* Agdasima como display. Va en CSS y no en `fontFamily` del tailwind.config
+   por lo mismo que documenta Hero.tsx: la familia del config no sobrevive a
+   los rebuilds de HMR de Next y las cifras vuelven a Outfit a media sesión. */
+.font-display {
+  font-family: var(--font-agdasima), sans-serif;
+}
+
+/* Rejilla técnica: es el "suelo" común de las secciones oscuras. La máscara
+   radial la desvanece hacia los bordes para que no se lea como un tablero
+   recortado, y el paso de 64px coincide con el ritmo de 8px del layout. */
+.tech-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(244, 196, 48, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(244, 196, 48, 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 20%, transparent 78%);
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 20%, transparent 78%);
+}
+
+/* Vidrio oscuro: misma receta que .hero-glass-card__surface con las alfas
+   invertidas. El bisel superior es lo que separa la tarjeta del fondo sin
+   necesitar un borde opaco (que sobre `void` se vería como un marco). */
+.tech-glass {
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background-color: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 24px 48px -24px rgba(0, 0, 0, 0.8);
+}
+
+/* Spotlight de cursor. Consume las --px/--py que escribe `usePointerGlow`
+   (el mismo hook del hero, sin tocarlo): el hook las pone en el contenedor y
+   heredan hasta aquí. Sin cursor quedan en 50% 50%, así que el reflejo nace
+   centrado y no salta al primer movimiento. */
+.tech-spot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+  background-image: radial-gradient(
+    circle 22rem at var(--px) var(--py),
+    rgba(244, 196, 48, 0.14),
+    transparent 62%
+  );
+}
+
+.tech-spot:hover::after,
+.tech-spot:focus-within::after {
+  opacity: 1;
+}
+
+/* Halo miel para los clímax (contacto, tarjeta activa del track). Se usa como
+   sombra y no como fondo para que no tape el contenido de detrás. */
+.tech-glow {
+  box-shadow: 0 0 80px -24px rgba(244, 196, 48, 0.45);
+}
+
+/* Marquee de testimonios. La pista lleva el contenido duplicado, así que
+   desplazarla -50% deja el segundo juego exactamente donde estaba el primero:
+   el bucle no tiene salto. Sólo anima `transform`. */
+@keyframes tech-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.tech-marquee {
+  animation: tech-marquee var(--marquee-duration, 52s) linear infinite;
+  will-change: transform;
+}
+
+.tech-marquee--reverse {
+  animation-direction: reverse;
+}
+
+/* Se pausa mientras se lee o se tabula dentro: un carrusel que no se detiene
+   es un carrusel que no se lee. El grupo de pausa es el contenedor de la fila
+   (ver TestimonialsSection), no la tarjeta. */
+.tech-marquee-row:hover .tech-marquee,
+.tech-marquee-row:focus-within .tech-marquee {
+  animation-play-state: paused;
+}
+
+/* Lenis conduce el scroll real del window; si además queda el smooth nativo
+   del :root, los saltos a #ancla se interpolan dos veces y dan un tirón. */
+html.lenis {
+  scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  /* Lenis necesita medir la altura real del documento. */
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .hero-bee-float {
+    animation: none;
+  }
+
+  /* El marquee no se ralentiza: se para. Un desplazamiento infinito es
+     exactamente lo que esta preferencia pide desactivar. El componente además
+     cae a un grid estático, esto es la red por si cambia la preferencia con la
+     página ya cargada. */
+  .tech-marquee {
+    animation: none;
+    will-change: auto;
+  }
+
+  .tech-spot::after {
+    transition: none;
+  }
+
+  /* El hook ni se engancha aquí, pero se fija el ángulo base por si el usuario
+     cambia la preferencia con la página ya cargada. */
+  .hero-glass-card__tilt {
+    transform: rotateY(-9deg) rotateX(4deg);
+    will-change: auto;
+  }
+}

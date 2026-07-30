@@ -1,0 +1,122 @@
+// Miel Mostaza - Schema Prisma
+// Fase 0: provider = sqlite (desarrollo local).
+//
+// NOTA para el port a PostgreSQL (Fase 4):
+//   1. Cambiar provider a "postgresql" y DATABASE_URL a la cadena de Railway.
+//   2. SQLite no soporta `enum` ni arrays escalares. Al pasar a Postgres se
+//      pueden convertir a `enum` los siguientes campos String:
+//        - User.role      -> enum Role { owner, admin }
+//        - Project.status -> enum ProjectStatus { pending, in_development, delivered }
+//        - Deliverable.type -> enum DeliverableType { video, link, document, image, other }
+//        - Document.category -> enum DocumentCategory { guide, contract, specs }
+//   Mientras tanto son String con valores por defecto documentados.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin") // owner | admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id        String    @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  logoUrl   String?
+  notes     String?
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  clientId     String
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  status       String        @default("pending") // pending | in_development | delivered
+  startDate    DateTime?
+  endDate      DateTime?
+  deliveryDate DateTime?
+  accessToken    String      @unique @default(cuid())
+  tokenExpiresAt DateTime?   // Fase 2: expiración del acceso cliente (30 días)
+  lastAccessedAt DateTime?   // Fase 2: último acceso del cliente al portal
+  showcase       Boolean     @default(false) // Fase 3: visible en el portfolio público
+  services     Service[]     // relación many-to-many (SQLite no soporta arrays escalares)
+  deliverables Deliverable[]
+  documents    Document[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([clientId])
+}
+
+model Service {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  icon        String?
+  order       Int       @default(0)
+  projects    Project[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Deliverable {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  type          String   @default("other") // video | link | document | image | other
+  fileUrl       String?
+  fileSize      Int?
+  downloadCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  content   String? // markdown
+  category  String   @default("guide") // guide | contract | specs
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// Fase 3: mensajes del formulario de contacto de la landing pública.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  interest  String? // servicios de interés (CSV)
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

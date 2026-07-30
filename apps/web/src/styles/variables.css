@@ -1,0 +1,17 @@
+/* Variables CSS de marca — Miel Mostaza (docs/CLAUDE.md) */
+:root {
+  /* Colores */
+  --color-honey: #f4c430; /* Primario - Honey Gold */
+  --color-mustard: #ffd54a; /* Secundario - Golden Mustard */
+  --color-mustard-dark: #d99b11; /* Oscuro - Dark Mustard */
+  --color-ink: #1f1f1f; /* Neutro base - Negro */
+  --color-mist: #efefef; /* Neutro light - Gris */
+  --color-success: #6ce56c; /* Éxito - Verde */
+  --color-error: #ff6a5a; /* Error - Coral */
+  --color-void: #0b0b0c; /* Base del tramo oscuro de la home */
+  --color-carbon: #141416; /* Superficie elevada sobre el void */
+
+  /* Tipografía (inyectada por next/font en layout.tsx) */
+  --font-heading: var(--font-outfit), sans-serif;
+  --font-body: var(--font-manrope), sans-serif;
+}
