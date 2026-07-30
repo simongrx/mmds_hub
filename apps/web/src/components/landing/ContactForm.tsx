@@ -4,6 +4,8 @@ import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { CheckIcon, ServiceIcon } from "@/components/icons/serviceIcons";
 import { publicApi } from "@/lib/api";
+import { BRAND } from "@/lib/brand";
+import { BACKEND_ENABLED } from "@/lib/features";
 import type { Service } from "@/lib/types";
 
 const empty = { name: "", email: "", phone: "", company: "", message: "" };
@@ -23,6 +25,45 @@ const FIELD: Record<Variant, string> = {
     "w-full rounded-xl border border-white/12 bg-white/[0.04] px-4 py-2.5 text-white placeholder:text-white/60 outline-none transition focus:border-honey focus:bg-white/[0.06] focus:ring-2 focus:ring-honey/35",
 };
 
+/**
+ * Sustituto del formulario cuando no hay API que reciba el envío.
+ *
+ * Se cambia el formulario entero en lugar de dejarlo y enseñar un error al
+ * pulsar "enviar": un formulario visible es una promesa de que alguien va a
+ * leer lo que escribas, y aquí no la hay. Que el visitante redacte su proyecto
+ * para que se pierda es peor que no ofrecerle el campo.
+ *
+ * El canal es `mailto:` porque no necesita servidor ninguno. El botón de
+ * WhatsApp de la página /contacto no se replica aquí a propósito: el número de
+ * lib/brand.ts sigue siendo un marcador de posición.
+ */
+function DirectContact({ dark }: { dark: boolean }) {
+  const subject = encodeURIComponent("Quiero cocinar algo con Miel Mostaza");
+  const body = encodeURIComponent(
+    "Hola, cuéntanos:\n\n- Qué necesitas:\n- Tu empresa:\n- Un teléfono de contacto:\n"
+  );
+
+  return (
+    <div className="text-center">
+      <h3 className={`font-heading text-xl font-bold ${dark ? "text-white/95" : ""}`}>
+        Hablemos por correo
+      </h3>
+      <p className={`mx-auto mt-2 max-w-sm ${dark ? "text-white/60" : "text-ink/60"}`}>
+        Cuéntanos qué tienes en mente y te respondemos en menos de 24 horas.
+      </p>
+      <a
+        href={`mailto:${BRAND.email}?subject=${subject}&body=${body}`}
+        className={`mt-6 inline-block rounded-xl bg-honey px-6 py-3 font-heading font-semibold text-ink transition hover:bg-mustard-dark hover:text-white ${
+          dark ? "shadow-[0_10px_30px_-8px_rgba(244,196,48,0.55)]" : ""
+        }`}
+      >
+        Escríbenos 🍯
+      </a>
+      <p className={`mt-4 text-sm ${dark ? "text-white/45" : "text-ink/50"}`}>{BRAND.email}</p>
+    </div>
+  );
+}
+
 export default function ContactForm({
   services,
   variant = "light",
@@ -35,6 +76,10 @@ export default function ContactForm({
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const dark = variant === "dark";
+
+  // Después de los hooks: React exige que se llamen todos en el mismo orden en
+  // cada render, así que la salida anticipada no puede ir antes.
+  if (!BACKEND_ENABLED) return <DirectContact dark={dark} />;
 
   function set(key: keyof typeof empty, value: string) {
     setForm((f) => ({ ...f, [key]: value }));

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import BrandMark from "@/components/BrandMark";
 import { BRAND } from "@/lib/brand";
+import { BACKEND_ENABLED } from "@/lib/features";
 
 export default function LandingFooter() {
   return (
@@ -22,7 +23,12 @@ export default function LandingFooter() {
             <li><a href="/#servicios" className="hover:text-white">Servicios</a></li>
             <li><a href="/#portfolio" className="hover:text-white">Casos</a></li>
             <li><Link href="/contacto" className="hover:text-white">Contacto</Link></li>
-            <li><Link href="/login" className="hover:text-white">Panel</Link></li>
+            {/* El panel sólo se enseña si existe: sin API el middleware
+                responde 404 a /login, y un enlace roto en el pie es peor que
+                no tener enlace. */}
+            {BACKEND_ENABLED && (
+              <li><Link href="/login" className="hover:text-white">Panel</Link></li>
+            )}
           </ul>
         </div>
         <div>
