@@ -31,6 +31,22 @@ no hace falta preparar nada. (Si dejas el mismo caso en dos formatos, gana el
 - La tarjeta grande recorta a 21:9 en escritorio y el texto se apoya abajo a la
   izquierda: deja aire en esa zona y no pongas nada importante en el borde inferior
 
+### Pasar una foto pesada a `.webp` sin instalar nada
+
+Una captura en PNG puede ocupar varios MB. No afecta a la velocidad de la web
+(el navegador siempre recibe una versión optimizada), pero sí engorda el
+repositorio. Con el servidor de desarrollo levantado, el propio optimizador de
+Next hace la conversión:
+
+```bash
+curl -H "Accept: image/webp" -o cali-enamora.webp \
+  "http://localhost:3000/_next/image?url=%2Fimages%2Fcasos%2Fcali-enamora.png&w=1920&q=88"
+```
+
+Sustituye el nombre en los dos sitios (y `%2F` es la barra `/` codificada). Con
+`q=88` las tres capturas actuales bajaron de 5,7 MB a 290 KB sin diferencia
+apreciable. Después borra el `.png`: si quedan los dos, gana el `.webp`.
+
 ## Si falta el archivo
 
 No pasa nada: ese caso usa el visual generado por SVG que ya existía
