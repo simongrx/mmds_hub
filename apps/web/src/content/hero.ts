@@ -2,6 +2,8 @@
 // Todo el texto visible va en español. Los valores marcados como TODO-CONTENIDO
 // son placeholders razonables para poder construir; deben confirmarse con el cliente.
 
+import { whatsappLink } from "@/lib/brand";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Título gigante de fondo (detrás de la abeja): dos palabras en mayúsculas a los
 // lados, con una etiqueta pequeña debajo de cada una empujada hacia el centro.
@@ -29,15 +31,15 @@ export const HERO_LEAD =
 // CTA principal → WhatsApp (objetivo de conversión de toda la página).
 // ─────────────────────────────────────────────────────────────────────────────
 
-// TODO-CONTENIDO: número de WhatsApp destino (formato internacional sin '+', ej. 57XXXXXXXXXX).
-export const WHATSAPP_NUMBER = "570000000000";
-
-// TODO-CONTENIDO: mensaje precargado del chat.
+// El número sale de lib/brand.ts, que es donde viven los datos de contacto.
+//
+// Antes se declaraba aquí otra vez, y se quedó con un marcador de posición
+// (570000000000) mientras brand.ts ya tenía el real: el botón de WhatsApp de
+// la barra superior —el CTA principal de la página— llevaba a un número que no
+// existe. Con una sola fuente eso no puede volver a pasar.
 export const WHATSAPP_MESSAGE = "Hola, quiero más información sobre sus servicios.";
 
-export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  WHATSAPP_MESSAGE,
-)}`;
+export const WHATSAPP_URL = whatsappLink(WHATSAPP_MESSAGE);
 
 export const CTA_PRIMARY_LABEL = "Hablemos";
 export const CTA_SECONDARY_LABEL = "Ver servicios";

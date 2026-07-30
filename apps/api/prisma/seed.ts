@@ -14,22 +14,33 @@ const services = [
   { name: "Contenido", slug: "contenido", icon: "🎥", order: 7, description: "Video, foto y copy que cuentan tu historia y enamoran a tu audiencia." },
 ];
 
-// Proyectos demo para el portfolio público (showcase).
+// Casos reales del portfolio público.
+//
+// El `name` no es sólo un rótulo: la foto de cada caso se busca en
+// apps/web/public/images/casos con ese nombre pasado a kebab-case (ver
+// caseImages.ts y el README de esa carpeta). Si se renombra un proyecto aquí,
+// hay que renombrar también su archivo o la tarjeta se queda sin foto.
 const showcaseProjects = [
   {
-    name: "Tienda online La Espiga",
-    description: "E-commerce completo con pasarela de pago y catálogo autogestionable para una panadería artesanal.",
-    serviceSlugs: ["desarrollo-web", "branding"],
+    name: "Cali Enamora",
+    description:
+      "Sitio de la corporación ciudadana que promueve el turismo sostenible en Cali y el Valle del Cauca: rutas, sabores, eventos y afiliación.",
+    url: "https://calienamoravalle.vercel.app",
+    serviceSlugs: ["desarrollo-web"],
   },
   {
-    name: "Campaña Meta Ads Sabor Local",
-    description: "Estrategia de anuncios que triplicó los pedidos en 3 meses para un restaurante de comida regional.",
-    serviceSlugs: ["meta-ads", "contenido"],
+    name: "Cali Rent a Car",
+    description:
+      "Web de alquiler de autos con catálogo de flota filtrable por categoría y transmisión, y reserva directa por WhatsApp.",
+    url: "https://calirenting.vercel.app",
+    serviceSlugs: ["desarrollo-web"],
   },
   {
-    name: "Asistente IA para Clínica Sonrisa",
-    description: "Chatbot con IA que agenda citas y responde dudas frecuentes 24/7, integrado a WhatsApp.",
-    serviceSlugs: ["ia", "automatizaciones"],
+    name: "Apex Debt Solutions",
+    description:
+      "Sitio en inglés para una consultora estadounidense que orienta a deudores sobre los programas federales de pago de préstamos estudiantiles.",
+    url: "https://www.apexdebtsolutions.net",
+    serviceSlugs: ["desarrollo-web"],
   },
 ];
 
@@ -57,33 +68,70 @@ async function main() {
   }
   console.log(`✅ ${services.length} servicios sembrados.`);
 
-  // Cliente demo + proyectos showcase para el portfolio de la landing.
-  const demoClient = await prisma.client.upsert({
+  // Cliente al que cuelgan los casos del portfolio.
+  //
+  // `company` se deja vacío a propósito: ese campo se pinta como antetítulo de
+  // cada tarjeta, y antes decía "Portfolio demo", que en una web real se lee
+  // como que el trabajo es de mentira. En estos casos el nombre del proyecto ya
+  // es la marca, así que un antetítulo sobra.
+  const showcaseClient = await prisma.client.upsert({
     where: { id: "demo-showcase-client" },
-    update: {},
+    update: { name: "Casos Miel Mostaza", company: null },
     create: {
       id: "demo-showcase-client",
       name: "Casos Miel Mostaza",
-      company: "Portfolio demo",
+      company: null,
     },
   });
 
   for (const p of showcaseProjects) {
     const existing = await prisma.project.findFirst({ where: { name: p.name } });
-    if (existing) continue;
-    await prisma.project.create({
-      data: {
-        name: p.name,
-        description: p.description,
-        clientId: demoClient.id,
-        status: "delivered",
-        showcase: true,
-        deliveryDate: new Date(),
-        services: { connect: p.serviceSlugs.map((slug) => ({ slug })) },
-      },
-    });
+    const common = {
+      description: p.description,
+      url: p.url,
+      status: "delivered",
+      showcase: true,
+    };
+    const connect = p.serviceSlugs.map((slug) => ({ slug }));
+
+    // Se actualiza en lugar de saltar el que ya existe: antes, cambiar una
+    // descripción o un enlace aquí no tenía ningún efecto sobre una base de
+    // datos ya sembrada, y el seed dejaba de ser la fuente de verdad sin que
+    // nada lo dijera.
+    if (existing) {
+      await prisma.project.update({
+        where: { id: existing.id },
+        // `set: []` antes de conectar deja exactamente los servicios de la
+        // lista, sin arrastrar los que tuviera de una siembra anterior. No
+        // vale en `create`, que parte de cero: de ahí que no se comparta.
+        data: { ...common, services: { set: [], connect } },
+      });
+    } else {
+      await prisma.project.create({
+        data: {
+          ...common,
+          name: p.name,
+          clientId: showcaseClient.id,
+          deliveryDate: new Date(),
+          services: { connect },
+        },
+      });
+    }
   }
-  console.log(`✅ ${showcaseProjects.length} proyectos showcase sembrados.`);
+
+  // Retira del portfolio los casos que ya no están en la lista (los tres de
+  // demostración que hubo antes). No se borran: pueden tener entregables o
+  // documentos colgando, así que sólo se ocultan.
+  const names = showcaseProjects.map((p) => p.name);
+  const retired = await prisma.project.updateMany({
+    where: { showcase: true, name: { notIn: names } },
+    data: { showcase: false },
+  });
+
+  console.log(`✅ ${showcaseProjects.length} casos del portfolio sembrados.`);
+  if (retired.count > 0) {
+    console.log(`   (${retired.count} caso(s) antiguo(s) retirado(s) del portfolio)`);
+  }
 }
 
 main()

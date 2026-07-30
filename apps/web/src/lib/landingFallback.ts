@@ -81,44 +81,40 @@ export const FALLBACK_SERVICES: Service[] = [
 /**
  * Casos del portafolio. Refleja `showcaseProjects` en el seed.
  *
- * Se omite `client` a propósito: en el seed esos proyectos cuelgan de un cliente
- * llamado "Portfolio demo", y ese texto se pinta como antetítulo de cada
- * tarjeta. Publicar "PORTFOLIO DEMO" sobre los casos de una web real queda a
- * medio hacer, y no corresponde inventar nombres de clientes. Sin `client` el
- * antetítulo sencillamente no se renderiza (ver CaseCard).
+ * El `name` tiene que coincidir con el del seed además de leerse bien: la foto
+ * de cada caso se busca en public/images/casos con ese nombre en kebab-case
+ * (ver caseImages.ts). "Cali Enamora" → cali-enamora.png. Si se cambia uno,
+ * hay que cambiar el otro.
  *
- * Los `id` alimentan el hash de CaseVisual y la búsqueda de fotos en
- * public/images/casos: tienen que ser estables, no importa su forma.
+ * Se omite `client` a propósito: ese campo se pinta como antetítulo y en estos
+ * casos el nombre del proyecto ya es la marca, así que sobra.
+ *
+ * Los `id` alimentan el hash de CaseVisual: tienen que ser estables, no
+ * importa su forma.
  */
 export const FALLBACK_PORTFOLIO: PortfolioItem[] = [
   {
-    id: "fallback-asistente-ia-clinica-sonrisa",
-    name: "Asistente IA para Clínica Sonrisa",
+    id: "fallback-cali-enamora",
+    name: "Cali Enamora",
     description:
-      "Chatbot con IA que agenda citas y responde dudas frecuentes 24/7, integrado a WhatsApp.",
-    services: [
-      { name: "IA", slug: "ia", icon: "🤖" },
-      { name: "Automatizaciones", slug: "automatizaciones", icon: "⚡" },
-    ],
+      "Sitio de la corporación ciudadana que promueve el turismo sostenible en Cali y el Valle del Cauca: rutas, sabores, eventos y afiliación.",
+    url: "https://calienamoravalle.vercel.app",
+    services: [{ name: "Desarrollo Web", slug: "desarrollo-web", icon: "🌐" }],
   },
   {
-    id: "fallback-campana-meta-ads-sabor-local",
-    name: "Campaña Meta Ads Sabor Local",
+    id: "fallback-cali-rent-a-car",
+    name: "Cali Rent a Car",
     description:
-      "Estrategia de anuncios que triplicó los pedidos en 3 meses para un restaurante de comida regional.",
-    services: [
-      { name: "Meta Ads", slug: "meta-ads", icon: "📈" },
-      { name: "Contenido", slug: "contenido", icon: "🎥" },
-    ],
+      "Web de alquiler de autos con catálogo de flota filtrable por categoría y transmisión, y reserva directa por WhatsApp.",
+    url: "https://calirenting.vercel.app",
+    services: [{ name: "Desarrollo Web", slug: "desarrollo-web", icon: "🌐" }],
   },
   {
-    id: "fallback-tienda-online-la-espiga",
-    name: "Tienda online La Espiga",
+    id: "fallback-apex-debt-solutions",
+    name: "Apex Debt Solutions",
     description:
-      "E-commerce completo con pasarela de pago y catálogo autogestionable para una panadería artesanal.",
-    services: [
-      { name: "Desarrollo Web", slug: "desarrollo-web", icon: "🌐" },
-      { name: "Branding", slug: "branding", icon: "🎨" },
-    ],
+      "Sitio en inglés para una consultora estadounidense que orienta a deudores sobre los programas federales de pago de préstamos estudiantiles.",
+    url: "https://www.apexdebtsolutions.net",
+    services: [{ name: "Desarrollo Web", slug: "desarrollo-web", icon: "🌐" }],
   },
 ];

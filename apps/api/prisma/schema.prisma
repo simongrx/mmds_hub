@@ -57,6 +57,7 @@ model Project {
   tokenExpiresAt DateTime?   // Fase 2: expiración del acceso cliente (30 días)
   lastAccessedAt DateTime?   // Fase 2: último acceso del cliente al portal
   showcase       Boolean     @default(false) // Fase 3: visible en el portfolio público
+  url            String?     // Sitio publicado del caso, si lo hay: la tarjeta del portfolio enlaza ahí
   services     Service[]     // relación many-to-many (SQLite no soporta arrays escalares)
   deliverables Deliverable[]
   documents    Document[]

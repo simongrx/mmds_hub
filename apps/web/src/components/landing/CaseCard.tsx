@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { ArrowUpRight } from "@/components/icons";
 import { ServiceIcon } from "@/components/icons/serviceIcons";
 import { usePointerVars } from "@/hooks/usePointerVars";
 import CaseVisual from "./CaseVisual";
@@ -9,10 +10,11 @@ import type { PortfolioItem } from "@/lib/serverApi";
 
 // Una celda del mosaico de casos.
 //
-// No es un enlace: no existe ruta pública de detalle de caso
-// (/proyecto/[accessToken] es el portal privado del cliente), y una tarjeta que
-// parece pulsable y no lleva a ningún sitio es peor que una que no lo parece.
-// De ahí que la interacción sea sólo el foco del cursor y la lámina de chips.
+// Es pulsable sólo si el caso tiene sitio publicado (`project.url`): abre esa
+// web en otra pestaña. Los que no lo tengan siguen siendo un `article` inerte,
+// porque no hay ruta pública de detalle de caso (/proyecto/[accessToken] es el
+// portal privado del cliente) y una tarjeta que parece pulsable y no lleva a
+// ningún sitio es peor que una que no lo parece.
 
 /** La celda ancha manda: se permite el índice gigante y la descripción. Las
     medianas comparten fila y ahí ese peso tipográfico las ahoga. */
@@ -65,11 +67,33 @@ export default function CaseCard({
   const [broken, setBroken] = useState(false);
   const hero = variant === "hero";
   const hasPhoto = Boolean(image) && !broken;
+  const url = project.url?.trim();
+
+  // El contenedor cambia de etiqueta según haya sitio que visitar, pero no de
+  // aspecto: las clases son las mismas para que el mosaico no se descuadre
+  // cuando unos casos tengan enlace y otros no.
+  const Tag = url ? "a" : "article";
+  const linkProps = url
+    ? {
+        href: url,
+        // Se abre fuera: el visitante está recorriendo la landing y no
+        // queremos sacarlo de ella. `noreferrer` incluye el comportamiento de
+        // `noopener`, que es lo que evita que la pestaña destino pueda
+        // manipular la de origen.
+        target: "_blank" as const,
+        rel: "noreferrer" as const,
+      }
+    : {};
 
   return (
-    <article
+    <Tag
+      {...linkProps}
       onPointerMove={onPointerMove}
-      className="tech-spot group relative isolate flex h-full flex-col justify-end overflow-hidden rounded-2xl border border-white/[0.07]"
+      className={`tech-spot group relative isolate flex h-full flex-col justify-end overflow-hidden rounded-2xl border border-white/[0.07] ${
+        url
+          ? "transition-colors duration-300 hover:border-honey/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-honey"
+          : ""
+      }`}
     >
       {hasPhoto && image ? (
         <Image
@@ -140,7 +164,20 @@ export default function CaseCard({
         )}
 
         <Chips project={project} max={hero ? 4 : 2} />
+
+        {/* Señal de que la tarjeta lleva a algún sitio. Sin esto la única pista
+            sería el cursor, que no existe en táctil ni al navegar con teclado.
+            El texto dice el destino ("Visitar el sitio") en lugar de un "ver
+            más" genérico, y el aviso de que abre fuera va en un span sólo para
+            lectores de pantalla. */}
+        {url && (
+          <p className="mt-5 inline-flex items-center gap-1.5 font-heading text-sm font-semibold text-honey">
+            Visitar el sitio
+            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none" />
+            <span className="sr-only">(se abre en una pestaña nueva)</span>
+          </p>
+        )}
       </div>
-    </article>
+    </Tag>
   );
 }

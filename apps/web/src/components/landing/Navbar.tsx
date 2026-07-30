@@ -6,12 +6,19 @@ import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
 import { ArrowUpRight, CloseIcon, MenuIcon } from "@/components/icons";
 import { CTA_PRIMARY_LABEL, WHATSAPP_URL } from "@/content/hero";
+import { TESTIMONIALS } from "@/lib/landingContent";
 
+// "Nosotros" apuntaba a /#testimonios, y esa sección ya no se renderiza
+// mientras no haya testimonios reales (ver landingContent.ts): el enlace se
+// quedaba sin destino y no hacía nada al pulsarlo. Vuelve solo, junto con la
+// sección, en cuanto se añada el primero.
 const links = [
   { href: "/#inicio", label: "Inicio", match: "/" },
   { href: "/#servicios", label: "Servicios", match: "/servicios" },
   { href: "/#portfolio", label: "Proyectos", match: null },
-  { href: "/#testimonios", label: "Nosotros", match: null },
+  ...(TESTIMONIALS.length > 0
+    ? [{ href: "/#testimonios", label: "Nosotros", match: null }]
+    : []),
   { href: "/contacto", label: "Contacto", match: "/contacto" },
 ];
 

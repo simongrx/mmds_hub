@@ -122,6 +122,11 @@ export default function TestimonialsSection() {
   // a la vez. Es el mismo contenido, no información nueva.
   const reversed = [...TESTIMONIALS].reverse();
 
+  // Sin testimonios no hay sección. Mismo criterio que el portfolio vacío: es
+  // preferible que el capítulo 03 no exista a que exista con un hueco o con
+  // relleno. Ver landingContent.ts para por qué la lista está vacía.
+  if (TESTIMONIALS.length === 0) return null;
+
   return (
     <section id="testimonios" className="tech-grid relative isolate bg-void py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6">

@@ -9,6 +9,8 @@ export interface PortfolioItem {
   name: string;
   description?: string | null;
   deliveryDate?: string | null;
+  /** Sitio publicado del caso. Si viene, la tarjeta enlaza ahí. */
+  url?: string | null;
   services: { name: string; icon?: string | null; slug: string }[];
   client?: { name: string; company?: string | null } | null;
 }

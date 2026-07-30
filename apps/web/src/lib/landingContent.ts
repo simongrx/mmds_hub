@@ -13,29 +13,23 @@ export interface Testimonial {
   avatar: string;
 }
 
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    name: "Laura Gómez",
-    company: "Panadería La Espiga",
-    quote: "Nuestra tienda online quedó deliciosa. Las ventas subieron desde la primera semana.",
-    rating: 5,
-    avatar: "👩‍🍳",
-  },
-  {
-    name: "Andrés Ruiz",
-    company: "Sabor Local",
-    quote: "Las campañas de Meta Ads nos llenaron el restaurante. Por fin publicidad que funciona.",
-    rating: 5,
-    avatar: "👨‍🍳",
-  },
-  {
-    name: "Clínica Sonrisa",
-    company: "Salud dental",
-    quote: "El asistente con IA agenda citas solo. Nos ahorró horas de trabajo cada día.",
-    rating: 5,
-    avatar: "🦷",
-  },
-];
+/**
+ * Testimonios de clientes. Vacío hasta que haya reales.
+ *
+ * Aquí había tres inventados —Laura Gómez de "Panadería La Espiga", Andrés Ruiz
+ * de "Sabor Local" y "Clínica Sonrisa"—, con nombre, empresa, cita y cinco
+ * estrellas. Nacieron como relleno para construir la sección, pero acabaron
+ * publicándose: personas que no existen recomendando un servicio, junto a
+ * casos que sí son reales, que es justo lo que los hace creíbles.
+ *
+ * Con la lista vacía, TestimonialsSection no renderiza nada y el capítulo 03
+ * desaparece de la home. Para recuperarlo basta añadir testimonios de verdad,
+ * con permiso de quien los firma:
+ *
+ *   { name: "Nombre real", company: "Su empresa", quote: "Lo que dijeron",
+ *     rating: 5, avatar: "🙂" }
+ */
+export const TESTIMONIALS: Testimonial[] = [];
 
 // Detalle por servicio (keyed por slug) para /servicios/[slug].
 export interface ServiceDetail {

@@ -131,6 +131,7 @@ publicRouter.get("/portfolio", async (_req, res, next) => {
         name: true,
         description: true,
         deliveryDate: true,
+        url: true,
         services: { select: { name: true, icon: true, slug: true } },
         client: { select: { name: true, company: true } },
       },
