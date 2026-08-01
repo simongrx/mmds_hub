@@ -89,6 +89,59 @@ export function ArrowUpRight({ className }: IconProps) {
   );
 }
 
+/** Flecha recta a la derecha.
+ *
+ * No es intercambiable con `ArrowUpRight`: la diagonal significa "esto sale
+ * fuera" (otra pestaña, otro dominio) y ésta significa "esto sigue aquí". Se
+ * usa en el "Más info" de las tarjetas y en los controles de carrusel. */
+export function ArrowRightIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden focusable="false">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Flecha recta a la izquierda. Control "anterior" de los carruseles. */
+export function ArrowLeftIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden focusable="false">
+      <path
+        d="M19 12H5M11 6l-6 6 6 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Chevron a la derecha. Separador entre los pasos del proceso: marca
+    continuidad, no navegación, así que va siempre `aria-hidden`. */
+export function ChevronRightIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden focusable="false">
+      <path
+        d="m9.5 6 6 6-6 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /** Hamburguesa del menú móvil. */
 export function MenuIcon({ className }: IconProps) {
   return (

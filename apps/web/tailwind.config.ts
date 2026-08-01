@@ -12,6 +12,12 @@ const config: Config = {
         honey: "#F4C430", // Primario
         mustard: "#FFD54A", // Secundario
         "mustard-dark": "#D99B11", // Oscuro
+        // La miel legible sobre claro. `honey` sobre blanco da 1,7:1 y
+        // `mustard-dark` 2,3:1: los dos fallan como texto en el tramo luminoso
+        // (el que va del hero al pie). Este da 5,8:1, AA para texto normal.
+        // Tampoco es un color de marca nuevo: es el mismo tono bajado en
+        // luminancia, igual que `void`/`carbon` lo son de `ink`.
+        "honey-ink": "#8A5B00",
         ink: "#1F1F1F", // Neutro base (negro)
         mist: "#EFEFEF", // Neutro light (gris)
         success: "#6CE56C",

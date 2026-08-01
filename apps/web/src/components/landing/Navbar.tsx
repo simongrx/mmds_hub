@@ -6,19 +6,16 @@ import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
 import { ArrowUpRight, CloseIcon, MenuIcon } from "@/components/icons";
 import { CTA_PRIMARY_LABEL, WHATSAPP_URL } from "@/content/hero";
-import { TESTIMONIALS } from "@/lib/landingContent";
 
-// "Nosotros" apuntaba a /#testimonios, y esa sección ya no se renderiza
-// mientras no haya testimonios reales (ver landingContent.ts): el enlace se
-// quedaba sin destino y no hacía nada al pulsarlo. Vuelve solo, junto con la
-// sección, en cuanto se añada el primero.
+// "Nosotros" apuntaba a /#testimonios, y esa sección ya no existe (ver la nota
+// de TESTIMONIALS en lib/landingContent.ts). El pie sí ofrece un "Nosotros" que
+// lleva a /#proceso, que es lo más parecido que hay publicado; aquí se omite
+// para no duplicar un enlace que no tiene destino propio.
 const links = [
   { href: "/#inicio", label: "Inicio", match: "/" },
   { href: "/#servicios", label: "Servicios", match: "/servicios" },
+  { href: "/#proceso", label: "Proceso", match: null },
   { href: "/#portfolio", label: "Proyectos", match: null },
-  ...(TESTIMONIALS.length > 0
-    ? [{ href: "/#testimonios", label: "Nosotros", match: null }]
-    : []),
   { href: "/contacto", label: "Contacto", match: "/contacto" },
 ];
 
@@ -53,11 +50,12 @@ export default function Navbar({ overlay = false }: { overlay?: boolean }) {
   // Transparente sólo mientras estamos arriba del todo y el menú móvil está
   // cerrado (si está abierto necesita fondo para que se lea).
   const transparent = overlay && !scrolled && !open;
-  // En la home, todo lo que hay tras el hero es el tramo oscuro, así que la
-  // barra sólida va de vidrio oscuro: una barra clara flotando sobre `void` se
-  // leería como un parche pegado encima. El resto de páginas (sin `overlay`) no
-  // cambia: siguen sobre fondo claro.
-  const dark = overlay;
+  // Era `overlay`: cuando tras el hero venía el tramo oscuro, una barra clara
+  // flotando sobre `void` se leía como un parche pegado encima. Ahora ese tramo
+  // es cielo de arriba abajo, así que la barra sólida vuelve a ser vidrio claro
+  // en todas las páginas. Se deja la variable en vez de podar las ramas: el
+  // vidrio oscuro sigue siendo el correcto si algún día vuelve un fondo oscuro.
+  const dark = false;
 
   return (
     <header

@@ -1,11 +1,19 @@
 import type { MetadataRoute } from "next";
+import { POSTS } from "@/lib/landingContent";
 import { getServices } from "@/lib/serverApi";
 import { SITE_URL } from "@/lib/siteUrl";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const services = await getServices();
 
-  const staticRoutes = ["", "/contacto"].map((path) => ({
+  // `/blog` sólo entra cuando hay entradas. Sin ellas la página existe (para no
+  // dar 404 a quien llegue de fuera) pero no se anuncia: meter en el sitemap una
+  // página que dice "todavía no hemos publicado nada" es pedirle a Google que
+  // indexe un hueco.
+  const paths = ["", "/contacto", "/casos-de-exito", "/preguntas-frecuentes"];
+  if (POSTS.length > 0) paths.push("/blog");
+
+  const staticRoutes = paths.map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,

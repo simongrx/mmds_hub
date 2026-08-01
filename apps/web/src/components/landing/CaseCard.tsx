@@ -89,9 +89,15 @@ export default function CaseCard({
     <Tag
       {...linkProps}
       onPointerMove={onPointerMove}
-      className={`tech-spot group relative isolate flex h-full flex-col justify-end overflow-hidden rounded-2xl border border-white/[0.07] ${
+      // La tarjeta sigue siendo oscura aunque la página sea clara, y a propósito:
+      // foto + velo + texto blanco sobre cielo azul es el mejor contraste de
+      // toda la home. Lo que sí cambia por el fondo nuevo: el borde tenue de
+      // antes era invisible contra un cielo brillante, y sin sombra las
+      // tarjetas flotaban sin apoyarse en nada. `.tech-spot` se queda porque el
+      // interior de la tarjeta es oscuro y ahí el halo miel es el correcto.
+      className={`tech-spot group relative isolate flex h-full flex-col justify-end overflow-hidden rounded-2xl border border-white/30 shadow-[0_28px_60px_-24px_rgba(70,55,15,0.55)] ${
         url
-          ? "transition-colors duration-300 hover:border-honey/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-honey"
+          ? "transition-colors duration-300 hover:border-honey/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           : ""
       }`}
     >
@@ -170,6 +176,19 @@ export default function CaseCard({
             El texto dice el destino ("Visitar el sitio") en lugar de un "ver
             más" genérico, y el aviso de que abre fuera va en un span sólo para
             lectores de pantalla. */}
+        {/* Botón redondo de la celda ancha. Es DECORATIVO: la tarjeta entera ya
+            es el enlace y el aviso de que abre fuera ya está más abajo. Meterlo
+            como <a> anidado sería HTML inválido y una segunda parada de
+            tabulación para el mismo destino. */}
+        {hero && url && (
+          <span
+            aria-hidden
+            className="absolute bottom-6 right-6 grid h-12 w-12 place-items-center rounded-full bg-honey text-ink shadow-[0_10px_24px_rgba(60,38,4,0.35)] transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transform-none"
+          >
+            <ArrowUpRight className="h-5 w-5" />
+          </span>
+        )}
+
         {url && (
           <p className="mt-5 inline-flex items-center gap-1.5 font-heading text-sm font-semibold text-honey">
             Visitar el sitio

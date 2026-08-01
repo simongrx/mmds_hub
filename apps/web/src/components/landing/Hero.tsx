@@ -1,3 +1,7 @@
+"use client";
+
+import { useRef } from "react";
+import { useScroll } from "framer-motion";
 import { ArrowUpRight, FEATURE_ICONS } from "@/components/icons";
 import {
   CTA_SECONDARY_LABEL,
@@ -6,12 +10,12 @@ import {
   HERO_LEAD,
   HERO_TITLE,
 } from "@/content/hero";
+import HeroBackdrop from "./HeroBackdrop";
 import HeroBee from "./HeroBee";
 import { CircuitsLeft, CircuitsRight, HoloChartCard, HoloPanel } from "./HeroDecorations";
 import HeroGlassCard from "./HeroGlassCard";
 import HeroGlassWord from "./HeroGlassWord";
 import HeroPodium from "./HeroPodium";
-import HeroVideoBackground from "./HeroVideoBackground";
 
 // Hero reconstruido a partir del mockup de referencia (1536×1024). Las posiciones
 // en % salen de medir los elementos del mockup, así que la composición escala
@@ -19,6 +23,15 @@ import HeroVideoBackground from "./HeroVideoBackground";
 //
 // La abeja ya no es un modelo 3D: es un PNG recortado con alfa sobrepuesto al
 // video de nubes. El podio, los circuitos y los paneles son vectoriales.
+//
+// ── Por qué esto es cliente ──
+//
+// El paso al cielo de ingredientes es una escena dirigida por el scroll, y el
+// progreso tiene que salir de UN solo sitio: el de esta <section>. Lo consumen
+// dos subárboles distintos —el fondo y la abeja—, así que nace aquí y baja por
+// props. No lee datos de servidor (todo el copy son constantes de
+// `@/content/hero`) y casi todos sus hijos ya eran cliente, así que lo único que
+// cambia es que este JSX estático viaja también al bundle.
 
 // Aun siendo condensada, Agdasima no llega al ancho de letra del mockup, así que
 // la comprimimos en X. El mockup no usa el mismo ancho en las dos palabras (0.35
@@ -116,27 +129,26 @@ function FeaturesBar({ className }: { className?: string }) {
 }
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // De 0 —el hero justo arriba del todo— a 1 —el pie del hero tocando el techo
+  // de la ventana, o sea el hero ya fuera—. Es el reloj de toda la transición.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
   return (
     // El mockup es 3:2. Para que la composición no se estire, el hero conserva
     // ese ratio (alto = ancho/1.5 = 66.7vw) sin bajar de pantalla completa ni
     // dispararse en monitores muy anchos.
     <section
+      ref={sectionRef}
       id="inicio"
       className="relative isolate min-h-[100svh] overflow-hidden lg:min-h-[max(100svh,min(66.7vw,125vh))]"
     >
-      {/* ── Fondo: video de nubes + resplandor solar arriba a la izquierda ── */}
-      <div className="absolute inset-0 -z-10">
-        <HeroVideoBackground />
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(circle_at_5%_10%,rgba(255,250,225,0.9),rgba(255,242,200,0.3)_30%,transparent_58%)]"
-        />
-        {/* Ya no hay velo cálido sobre la izquierda: el fondo queda limpio con el
-            video y el contraste del copy lo aporta la superficie de vidrio de la
-            card (ver HeroGlassCard). */}
-        {/* Fundido al color de la siguiente sección para que la costura no se note. */}
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-mist" />
-      </div>
+      {/* ── Fondo, descenso al cielo de ingredientes y goteo de miel ── */}
+      <HeroBackdrop progress={scrollYProgress} />
 
       {/* ══ Composición fiel al mockup (lg y superiores) ══ */}
       <div aria-hidden className="hidden lg:block">
@@ -199,7 +211,10 @@ export default function Hero() {
           Un único árbol para los dos layouts: apilado en flujo por debajo de lg
           y posicionado en absoluto a partir de lg. Así no se duplica el <h1>. */}
       <div className="relative flex min-h-[100svh] flex-col items-center justify-center gap-8 px-6 pb-12 pt-28 lg:absolute lg:inset-0 lg:block lg:min-h-0 lg:p-0">
-        <HeroBee className="w-[62%] max-w-[280px] lg:absolute lg:left-[51.4%] lg:top-[41%] lg:z-[5] lg:w-[29%] lg:max-w-[500px] lg:-translate-x-1/2 lg:-translate-y-1/2" />
+        <HeroBee
+          progress={scrollYProgress}
+          className="w-[62%] max-w-[280px] lg:absolute lg:left-[51.4%] lg:top-[41%] lg:z-[5] lg:w-[29%] lg:max-w-[500px] lg:-translate-x-1/2 lg:-translate-y-1/2"
+        />
         {/* min-w evita que a 1024px la columna se quede tan estrecha que el
             titular se parta en tres líneas y el CTA acabe bajo la barra. El
             ancho sube un 30% junto con la tipografía, así que se recoloca más a

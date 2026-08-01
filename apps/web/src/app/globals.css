@@ -233,11 +233,15 @@ h6 {
   }
 }
 
-/* ── Tramo oscuro (todo lo que va después del hero) ───────────────────────────
-   El hero es luminoso; a partir de DarkSeam la página se hunde en `void` con la
-   miel como neón. Estas clases son el vocabulario compartido de ese tramo, y
-   son deliberadamente hermanas de las del hero (mismo vidrio, mismas @property
-   --px/--py) para que la costura no se lea como un cambio de sitio. */
+/* ── Tramo oscuro ─────────────────────────────────────────────────────────────
+   Vocabulario de las superficies sobre `void`: vidrio oscuro y miel como neón.
+   Son deliberadamente hermanas de las del hero (mismo vidrio, mismas @property
+   --px/--py) para que la costura no se lea como un cambio de sitio.
+
+   Esto cubría toda la home a partir del hero, cuando la página se hundía en
+   negro. Ya no: ahora la home es un cielo de arriba abajo (ver el bloque "Tramo
+   luminoso" más abajo) y aquí quedan el pie, /contacto, el panel y las tarjetas
+   de caso, que siguen siendo oscuras a propósito. */
 
 /* Agdasima como display. Va en CSS y no en `fontFamily` del tailwind.config
    por lo mismo que documenta Hero.tsx: la familia del config no sobrevive a
@@ -336,6 +340,305 @@ h6 {
   animation-play-state: paused;
 }
 
+/* ── Tramo luminoso (el que va del hero al pie) ───────────────────────────────
+   Hermano claro del vocabulario de arriba, y por la misma razón que aquél era
+   hermano del hero: la costura no se puede leer como un cambio de sitio. Mismas
+   recetas, alfas invertidas — el texto ya no es blanco sobre `void` sino `ink`
+   sobre nubes.
+   La diferencia que sí importa: aquí todo se apoya sobre FOTO, no sobre color
+   plano. De ahí que estos fondos sean bastante más opacos que los de
+   `.tech-glass`, que sólo tenía que despegarse de un negro liso. */
+
+/* Vidrio blanco. NO fija `border-radius` a propósito: este CSS va sin capa y le
+   gana a las utilidades de Tailwind, así que un radio aquí anularía el
+   `rounded-2xl` de cada tarjeta. El radio lo pone quien la use. */
+.sky-glass {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background-color: rgba(255, 255, 255, 0.78);
+  background-image: linear-gradient(150deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.45),
+    0 26px 50px -26px rgba(120, 90, 20, 0.55);
+}
+
+/* El desenfoque, sólo en escritorio. Siete tarjetas con backdrop-filter sobre
+   una foto a sangre son siete copias desenfocadas del fondo recompuestas en
+   cada frame, y eso en un Android de gama media se nota al scrollear. Debajo de
+   lg el blanco se queda en 0.78 y el vidrio se resuelve con opacidad, no con
+   GPU. (El `.tech-glass` de arriba sí desenfoca siempre, pero es que allí lo
+   que hay detrás es `void` liso.) */
+@media (min-width: 1024px) {
+  .sky-glass {
+    background-color: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sky-glass {
+    background-color: rgba(255, 255, 255, 0.82);
+  }
+}
+
+/* Spotlight claro. Consume las mismas --px/--py que `.tech-spot` (las escribe
+   `usePointerVars`, sin tocar el hook). Sobre blanco un halo miel translúcido
+   no se ve: con `multiply` la miel oscurece en vez de aclarar y el gesto se lee
+   igual que en el tramo oscuro. */
+.sky-spot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+  background-image: radial-gradient(
+    circle 22rem at var(--px) var(--py),
+    rgba(244, 196, 48, 0.42),
+    transparent 62%
+  );
+  mix-blend-mode: multiply;
+}
+
+.sky-spot:hover::after,
+.sky-spot:focus-within::after {
+  opacity: 1;
+}
+
+/* Hoja curvada: el panel blanco de Proceso y de Impacto.
+   NO es el fondo de la sección, y eso es lo único que importa aquí. El fondo de
+   la sección sigue siendo el degradado de costura con sus dos extremos exactos
+   (ver la tabla de skyBackdrops.ts); la hoja es una capa DENTRO. Si el radio
+   fuera de la <section>, las muescas de las cuatro esquinas dejarían ver el
+   color de la raíz — cuñas de color equivocado justo donde el invariante exige
+   que la primera y la última fila pintadas sean el color del vecino.
+
+   El radio va elíptico: 50% del ancho en horizontal y una profundidad fija en
+   vertical. Los dos radios de arriba se tocan exactamente en el centro, así que
+   el canto es UN arco y no dos esquinas redondeadas. Y como la profundidad va en
+   rem y no en %, la curva se lee igual de ancha y suave a 375px que a 2560 —
+   que es justo lo que una máscara SVG estirada no sabe hacer.
+
+   Los dos parámetros llegan por custom property desde cada sección. */
+.sky-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--sheet-inset, 2rem);
+  bottom: var(--sheet-inset, 2rem);
+  border-radius: 50% / var(--sheet-curve, 3rem);
+  background-color: #ffffff;
+  background-image: linear-gradient(to bottom, #ffffff 0%, #fdfbf6 58%, #faf5e9 100%);
+  box-shadow: 0 44px 90px -50px rgba(120, 90, 20, 0.5);
+}
+
+/* Los goterones de miel (HoneyDrip): respiran en bucle, cada uno a su ritmo.
+
+   `transform-box: fill-box` es lo que hace que `transform-origin: top center` se
+   refiera a la caja de la propia figura y no al viewport del SVG — sin él la
+   gota se estiraría desde el techo del SVG y se despegaría de la banda.
+
+   Son dos capas y no una: el `<g>` de fuera lleva el estiramiento que dirige
+   quien usa el componente (el hero lo escribe por custom property desde su rAF)
+   y el `<path>` de dentro lleva este bucle. En la misma capa, la animación
+   ganaría siempre y el estiramiento no se vería. */
+.honey-drop-stretch,
+.honey-drop {
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+
+@keyframes honey-drop-breathe {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.14);
+  }
+}
+
+/* Sin `will-change`: estas figuras van dentro de un grupo con filtro SVG, y el
+   contenido filtrado no se puede componer en su propia capa — prometer una capa
+   que el navegador no puede dar sólo gasta memoria. */
+.honey-drop {
+  animation: honey-drop-breathe var(--drop-dur, 7s) ease-in-out infinite;
+}
+
+/* Las gotas que se desprenden. La mayor parte del ciclo están invisibles: el
+   goterón engorda, suelta la gota, y la gota cae y se desvanece. Las duraciones
+   las pone HoneyDrip, largas y desfasadas, para que sea un hallazgo y no una
+   fuente.
+
+   `ease-in` y no `ease-out`: una gota que cae ACELERA. Con la curva al revés se
+   lee como una pompa que sube.
+
+   `--bead-fall` llega en px, que dentro del SVG son unidades de viewBox. Lo
+   controla quien usa el componente porque el hero lleva `overflow-hidden` y una
+   caída larga se cortaría en el aire, justo sobre la unión con la foto. */
+@keyframes honey-bead-fall {
+  0%,
+  62% {
+    transform: translateY(0) scale(0.55);
+    opacity: 0;
+  }
+  70% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--bead-fall, 90px)) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.honey-bead {
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation: honey-bead-fall var(--bead-dur, 11s) ease-in infinite;
+}
+
+/* Quien pide menos movimiento se queda la miel quieta, no sin miel. La gota sí
+   desaparece del todo: es una figura que sólo existe mientras cae. */
+@media (prefers-reduced-motion: reduce) {
+  .honey-drop {
+    animation: none;
+  }
+
+  .honey-bead {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Relleno dorado para una línea del titular de capítulo.
+   El degradado se recorta al glifo y el color transparente es lo que lo deja
+   ver. Ojo con las paradas: arranca claro sólo en el borde SUPERIOR de la letra
+   y baja rápido, así que la masa del glifo cae en el tramo oscuro. Con un
+   degradado que se quedara claro a media altura, el texto no se leería sobre
+   fondo claro.
+
+   Aun así, esta línea es DECORATIVA y no informativa: sobre el velo claro de
+   ingredientes su punto más flojo se queda muy por debajo del contraste mínimo.
+   Lo que lo hace defendible es que la misma palabra está en el eyebrow de
+   encima, en tinta y con contraste de sobra, así que nadie pierde información
+   si el dorado no le llega. No lo uses para nada que no esté repetido. */
+.title-gold {
+  background-image: linear-gradient(to bottom, #ffe7a0 0%, #f4c430 34%, #d99b11 68%, #b07d10 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* Define el canto del glifo, que es lo único que lo separa de un fondo claro. */
+  text-shadow: 0 2px 10px rgba(120, 82, 0, 0.28);
+}
+
+/* Sin `background-clip: text` el color transparente dejaría el titular INVISIBLE.
+   Vale más perder el degradado que perder la palabra. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .title-gold {
+    background-image: none;
+    color: #b07d10;
+  }
+}
+
+/* Pista de carrusel sin barra de scroll. La affordance la dan los botones, los
+   puntos, y sobre todo la tajada del card siguiente que siempre asoma (ver el
+   `basis` de la pista): sin esa tajada, ocultar la barra dejaría el carrusel
+   sin ninguna señal de que se desplaza. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Halo para el texto corto que se apoya directamente en la foto (eyebrows,
+   cifras). Mismo recurso que el SmallLabel del hero, sin caja. */
+.sky-ink-halo {
+  text-shadow:
+    0 1px 12px rgba(255, 251, 238, 0.95),
+    0 0 26px rgba(255, 248, 225, 0.7);
+}
+
+/* ── El carril del arco de ingredientes ───────────────────────────────────────
+   La sección se convierte en un tramo alto de scroll (`.arc-runway`) con una
+   capa anclada dentro (`.arc-pin`) que se queda quieta mientras el carril pasa
+   por delante. El progreso de ese recorrido es lo que hace girar el arco.
+
+   Va en CSS y no en clases de Tailwind por una razón concreta: la anulación de
+   más abajo tiene que GANAR por cascada normal. Con utilidades de Tailwind
+   habría que recurrir a `!important`, y esto es justo el tipo de regla donde
+   eso acaba peleándose con otra cosa seis meses después.
+
+   Sólo a partir de lg: por debajo no hay ancho para que el arco se lea y la
+   sección vuelve a medir lo que mida su contenido, con la fila deslizante. */
+@media (min-width: 1024px) {
+  .arc-runway {
+    height: 280vh;
+  }
+
+  .arc-pin {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+  }
+}
+
+/* ── El portal de miel entre el hero e ingredientes ──────────────────────────
+   Mismo mecanismo que el carril del arco: un tramo alto con una capa anclada
+   dentro que se queda quieta mientras el carril pasa. Aquí el recorrido útil son
+   70vh (170 de carril menos la pantalla del pin), y es corto a propósito: en
+   esta misma página ya se quitó un tramo anclado de n×100vh por costar "tres
+   pantallas de scroll secuestrado" (ver la cabecera de PortfolioSection).
+
+   A diferencia del arco, este NO va restringido a lg: un corte a pantalla
+   completa se lee igual de bien —o mejor— en un móvil.
+
+   Va en CSS por lo mismo que el otro: para que la anulación de abajo gane por
+   cascada sin `!important`. */
+.honey-gate-runway {
+  height: 170vh;
+}
+
+.honey-gate-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* Va DESPUÉS a propósito: quien pide menos movimiento no debe encontrarse la
+   página anclada bajo los pies. Se cae el carril, se cae el anclaje, y la
+   sección pasa a comportarse como cualquier otra. */
+@media (prefers-reduced-motion: reduce) {
+  .arc-runway {
+    height: auto;
+  }
+
+  .arc-pin {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* El portal desaparece ENTERO del recorrido, no se queda quieto: es una
+     transición, no contenido. Con alto 0 el hero vuelve a tocar la foto de
+     ingredientes directamente, que es el estado que había antes de existir. */
+  .honey-gate-runway {
+    height: 0;
+  }
+
+  .honey-gate-pin {
+    display: none;
+  }
+}
+
 /* Lenis conduce el scroll real del window; si además queda el smooth nativo
    del :root, los saltos a #ancla se interpolan dos veces y dan un tirón. */
 html.lenis {
@@ -366,7 +669,8 @@ html.lenis body {
     will-change: auto;
   }
 
-  .tech-spot::after {
+  .tech-spot::after,
+  .sky-spot::after {
     transition: none;
   }
 

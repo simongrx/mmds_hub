@@ -2,10 +2,9 @@
 
 import { motion, useScroll, useSpring } from "framer-motion";
 
-// Rail de progreso de la página, justo debajo del navbar. El recorrido de la
-// home pasa por un tramo anclado (el track de proyectos) donde el scroll
-// vertical mueve contenido horizontal: sin un indicador global, ahí se pierde
-// la referencia de cuánto queda.
+// Rail de progreso de la página, justo debajo del navbar. La home es un
+// recorrido largo de cinco capítulos encadenados sin cortes visibles entre
+// ellos, que es justo donde se pierde la referencia de cuánto queda.
 //
 // Decorativo: el progreso ya lo comunica la propia página, así que va fuera del
 // árbol de accesibilidad en vez de anunciarse como progressbar.
@@ -18,7 +17,9 @@ export default function ScrollProgress() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-x-0 top-[72px] z-40 h-[2px] bg-white/5"
+      // El raíl era `bg-white/5`, invisible ahora que la página es clara de
+      // arriba abajo. La barra de miel sí se lee sobre cualquiera de los dos.
+      className="pointer-events-none fixed inset-x-0 top-[72px] z-40 h-[2px] bg-black/5"
     >
       <motion.div
         style={{ scaleX: width }}

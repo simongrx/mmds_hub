@@ -11,3 +11,19 @@ export const BRAND = {
 
 export const whatsappLink = (text: string) =>
   `https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(text)}`;
+
+export type SocialId = "linkedin" | "instagram" | "behance";
+
+/**
+ * Perfiles sociales. Vacío hasta que existan de verdad.
+ *
+ * Mismo criterio que TESTIMONIALS y que POSTS: el pie sólo pinta la fila de
+ * iconos si este array tiene algo. Un icono de LinkedIn que no lleva a ningún
+ * LinkedIn es peor que no tener icono.
+ *
+ * Los iconos están dibujados y listos en components/icons/socialIcons.tsx; lo
+ * único que falta son las URLs. Para encenderlo, añadir aquí:
+ *
+ *   { id: "instagram", label: "Instagram", url: "https://instagram.com/…" },
+ */
+export const SOCIAL: { id: SocialId; label: string; url: string }[] = [];

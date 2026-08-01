@@ -2,6 +2,9 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import CaseCard, { type CaseVariant } from "./CaseCard";
+import SectionHeading from "./SectionHeading";
+import SkyBackdrop from "./SkyBackdrop";
+import { SKY } from "./skyBackdrops";
 import type { PortfolioItem } from "@/lib/serverApi";
 
 // 02 — Casos que hemos cocinado.
@@ -64,25 +67,51 @@ export default function PortfolioSection({
   const spans = caseSpans(projects.length);
 
   return (
-    <section id="portfolio" className="tech-grid relative isolate bg-carbon py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="max-w-3xl">
-          <p className="flex items-center gap-3">
-            <span className="font-display text-sm leading-none text-honey">02</span>
-            <span aria-hidden className="h-px w-8 bg-honey/40" />
-            <span className="font-heading text-[0.7rem] font-semibold uppercase tracking-[0.34em] text-white/55">
-              Casos
-            </span>
-          </p>
-          <h2 className="mt-5 font-heading text-[clamp(2rem,4.6vw,3.4rem)] font-bold leading-[1.08] text-white/95">
-            Casos que hemos cocinado
-          </h2>
-          <p className="mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-white/60">
-            Proyectos reales con resultados que dan hambre de más.
-          </p>
-        </div>
+    // El padding sigue siendo generoso por una razón concreta: esta foto trae
+    // la ola de miel con goteo pintada en su canto de arriba y el podio blanco
+    // en el de abajo, y en panorámico se ven ENTEROS. El contenido tiene que
+    // dejarlos respirar o se le monta encima. `min-h-[64.1vw]` es el alto de la
+    // banda (100vw ÷ 1566/1004).
+    <section
+      id="portfolio"
+      className="relative isolate overflow-hidden pt-[max(7rem,13vw)] pb-[max(9rem,20vw)] lg:min-h-[64.1vw]"
+    >
+      {/* `align="top"`: la foto se pega al techo de la sección. Su primera fila
+          es #F0EADC, que es exactamente donde muere la foto de ingredientes, así
+          que las dos se tocan sin escalón — que es lo que hace falta ahora que
+          "Proceso" flota por encima de esa unión en vez de rellenarla.
+          El goteo que esta foto trae pintado en su canto queda TAPADO por la
+          hoja de Proceso, que se solapa 11vw sobre ella. Ése es el goteo que
+          ahora dibuja HoneyDrip.
+          `trail`: por abajo el relleno lleva la foto hasta #DBD3CA, el techo de
+          la foto del cierre, por el mismo motivo. */}
+      <SkyBackdrop sky={SKY.casos} align="top" trail="#DBD3CA" />
 
-        <ul className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
+      {/* Velo lateral. En su franja media el cielo de fondo3 es azul medio y ahí
+          el texto de tinta se queda por debajo del contraste mínimo. El velo lo
+          sube de sobra y, al ir de izquierda a derecha y no como una caja, se
+          lee como luz de sol entrando por ese lado. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-full bg-[linear-gradient(to_right,rgba(255,252,244,0.86),rgba(255,252,244,0.4)_58%,transparent)] lg:w-[52%]"
+      />
+
+      <div className="mx-auto max-w-[88rem] px-6 lg:grid lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)] lg:gap-14">
+        <SectionHeading
+          tone="light"
+          index="03"
+          eyebrow="Casos reales"
+          title="Proyectos que han despegado"
+          lead="Resultados que hablan. Historias que inspiran."
+          display
+          action={{ href: "/casos-de-exito", label: "Ver todos los proyectos" }}
+          className="lg:sticky lg:top-28 lg:self-start"
+        />
+
+        {/* ── El mosaico no se toca: caseSpans, SPAN_CLS y las proporciones
+              siguen igual. Sólo `lg:mt-0`, porque ya no va debajo de la
+              cabecera sino a su lado. ── */}
+        <ul className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-2 lg:mt-0 lg:grid-cols-6">
           {projects.map((project, i) => {
             const span = spans[i] ?? 3;
             return (

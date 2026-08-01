@@ -129,7 +129,8 @@ export function CheckIcon({ className }: IconProps) {
   );
 }
 
-/** Chevron del indicador de scroll (DarkSeam). */
+/** Chevron hacia abajo. Lo usaba el indicador de scroll de la costura oscura
+    que había tras el hero; se quedó sin consumidor al pasar la home a claro. */
 export function ChevronDownIcon({ className }: IconProps) {
   return (
     <Svg className={className}>
